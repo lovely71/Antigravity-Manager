@@ -551,7 +551,7 @@ print(response.text)`;
     });
 
     return (
-        <div className="h-full w-full overflow-y-auto">
+        <div className="h-full w-full overflow-y-auto overflow-x-hidden">
             <div className="p-5 space-y-4 max-w-7xl mx-auto">
 
 
@@ -609,7 +609,7 @@ print(response.text)`;
                                             <HelpTooltip
                                                 text={t('proxy.config.port_tooltip')}
                                                 ariaLabel={t('proxy.config.port')}
-                                                placement="right"
+                                                placement="top"
                                             />
                                         </span>
                                     </label>
@@ -633,7 +633,7 @@ print(response.text)`;
                                             <HelpTooltip
                                                 text={t('proxy.config.request_timeout_tooltip')}
                                                 ariaLabel={t('proxy.config.request_timeout')}
-                                                placement="right"
+                                                placement="top"
                                             />
                                         </span>
                                     </label>
@@ -667,7 +667,7 @@ print(response.text)`;
                                             <HelpTooltip
                                                 text={t('proxy.config.auto_start_tooltip')}
                                                 ariaLabel={t('proxy.config.auto_start')}
-                                                placement="right"
+                                                placement="top"
                                             />
                                         </span>
                                     </label>
@@ -788,7 +788,7 @@ print(response.text)`;
                                         <HelpTooltip
                                             text={t('proxy.config.api_key_tooltip')}
                                             ariaLabel={t('proxy.config.api_key')}
-                                            placement="right"
+                                            placement="top"
                                         />
                                     </span>
                                 </label>

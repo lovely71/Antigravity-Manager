@@ -44,7 +44,7 @@ export default function HelpTooltip({
                 <CircleHelp size={iconSize} />
             </button>
             <span
-                className={`pointer-events-none absolute z-50 ${placementClasses[placement]} w-80 rounded-md bg-gray-900 text-white text-[11px] leading-snug px-2 py-1 shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150`}
+                className={`pointer-events-none absolute z-50 ${placementClasses[placement]} w-80 max-w-[90vw] sm:max-w-xs rounded-md bg-gray-900 text-white text-[11px] leading-snug px-2 py-1 shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150`}
             >
                 {text}
             </span>

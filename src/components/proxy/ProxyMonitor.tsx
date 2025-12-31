@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
-import { ask } from '@tauri-apps/plugin-dialog';
+import ModalDialog from '../common/ModalDialog';
 import { useTranslation } from 'react-i18next';
 import { request as invoke } from '../../utils/request';
 import { Trash2, Search, X } from 'lucide-react';
@@ -39,6 +39,7 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
     const [filter, setFilter] = useState('');
     const [selectedLog, setSelectedLog] = useState<ProxyRequestLog | null>(null);
     const [isLoggingEnabled, setIsLoggingEnabled] = useState(false);
+    const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
 
     const loadData = async () => {
         try {
@@ -50,7 +51,7 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
 
             const history = await invoke<ProxyRequestLog[]>('get_proxy_logs', { limit: 100 });
             if (Array.isArray(history)) setLogs(history);
-            
+
             const currentStats = await invoke<ProxyStats>('get_proxy_stats');
             if (currentStats) setStats(currentStats);
         } catch (e) {
@@ -95,8 +96,8 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
     }, []);
 
     const filteredLogs = logs
-        .filter(log => 
-            log.url.toLowerCase().includes(filter.toLowerCase()) || 
+        .filter(log =>
+            log.url.toLowerCase().includes(filter.toLowerCase()) ||
             log.method.toLowerCase().includes(filter.toLowerCase()) ||
             (log.model && log.model.toLowerCase().includes(filter.toLowerCase())) ||
             log.status.toString().includes(filter)
@@ -112,19 +113,18 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
         { label: t('monitor.filters.images'), value: 'images' }
     ];
 
-    const clearLogs = async () => {
-        const confirmed = await ask(t('monitor.dialog.clear_msg'), {
-            title: t('monitor.dialog.clear_title'),
-            kind: 'warning',
-        });
-        if (confirmed) {
-            try {
-                await invoke('clear_proxy_logs');
-                setLogs([]);
-                setStats({ total_requests: 0, success_count: 0, error_count: 0 });
-            } catch (e) {
-                console.error("Failed to clear logs", e);
-            }
+    const clearLogs = () => {
+        setIsClearConfirmOpen(true);
+    };
+
+    const executeClearLogs = async () => {
+        setIsClearConfirmOpen(false);
+        try {
+            await invoke('clear_proxy_logs');
+            setLogs([]);
+            setStats({ total_requests: 0, success_count: 0, error_count: 0 });
+        } catch (e) {
+            console.error("Failed to clear logs", e);
         }
     };
 
@@ -142,13 +142,12 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
         <div className={`flex flex-col bg-white dark:bg-base-100 rounded-xl shadow-sm border border-gray-100 dark:border-base-200 overflow-hidden ${className || 'h-[400px]'}`}>
             <div className="p-3 border-b border-gray-100 dark:border-base-200 space-y-3 bg-gray-50/30 dark:bg-base-200/30">
                 <div className="flex items-center gap-4">
-                    <button 
+                    <button
                         onClick={toggleLogging}
-                        className={`btn btn-sm gap-2 px-4 border font-bold ${
-                            isLoggingEnabled 
-                            ? 'bg-red-500 border-red-600 text-white animate-pulse' 
+                        className={`btn btn-sm gap-2 px-4 border font-bold ${isLoggingEnabled
+                            ? 'bg-red-500 border-red-600 text-white animate-pulse'
                             : 'bg-white dark:bg-base-200 border-gray-300 text-gray-600'
-                        }`}
+                            }`}
                     >
                         <div className={`w-2.5 h-2.5 rounded-full ${isLoggingEnabled ? 'bg-white' : 'bg-gray-400'}`} />
                         {isLoggingEnabled ? t('monitor.logging_status.active') : t('monitor.logging_status.paused')}
@@ -156,8 +155,8 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
 
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2 text-gray-400" size={14} />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             placeholder={t('monitor.filters.placeholder')}
                             className="input input-sm input-bordered w-full pl-9 text-xs"
                             value={filter}
@@ -274,6 +273,17 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
                     </div>
                 </div>
             )}
+
+            <ModalDialog
+                isOpen={isClearConfirmOpen}
+                title={t('monitor.dialog.clear_title')}
+                message={t('monitor.dialog.clear_msg')}
+                type="confirm"
+                confirmText={t('common.delete')}
+                isDestructive={true}
+                onConfirm={executeClearLogs}
+                onCancel={() => setIsClearConfirmOpen(false)}
+            />
         </div>
     );
 };
